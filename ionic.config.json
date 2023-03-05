@@ -1,0 +1,7 @@
+{
+  "name": "OliverVocabulary",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}
