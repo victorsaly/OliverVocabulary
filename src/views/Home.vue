@@ -408,22 +408,14 @@ export default {
       {
         let self = this;
         try {
-         const params = {
-            prompt: "Is the " + self.word  + ", "+ recordedText + "?",
-            model: "text-davinci-003",
-            temperature: 0.3,
-            max_tokens: 60,
-            top_p: 1
-          };
 
-          var res = await self.axiosClient.post("https://api.openai.com/v1/completions", params)            
-          // var res = await axios.get('https://localhost:7284/OpenAI?word=' + self.word + '&answer=' + recordedText);
+          var res = await self.axiosClient.get("wordMeaning?word=" + self.word + "&meaning=" + recordedText)            
           
           let aiResponse = null;
 
-          if (res != null && res.data && res.data.choices.length > 0)
+          if (res != null && res.data)
           {
-            aiResponse = res.data.choices[0].text;
+            aiResponse = res.data;
           }
           console.log(aiResponse);
           if (aiResponse != null && aiResponse.includes('Yes'))
@@ -490,10 +482,10 @@ export default {
   },
   mounted() {
     var self = this;
-
     self.axiosClient = axios.create({
+      baseURL:"https://openairobotfunctionapi.azure-api.net/AIRobot",
       headers: {
-        Authorization: "Bearer " + self.openAi_apiKey,
+        "Ocp-Apim-Subscription-Key":  self.openAi_apiKey,
       },
     });
 
