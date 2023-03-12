@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Vocabulary Game V1.0.5</ion-title>
+        <ion-title>Vocabulary Game V1.0.6</ion-title>
         <ion-chip slot="end">
           <ion-icon :icon="star" color="dark"></ion-icon>
           <ion-label>{{ stars }}</ion-label>
@@ -48,9 +48,9 @@
     
       <ion-footer no-padding style="margin-bottom:5px;">
           <ion-button
-          v-if="isPlayMode && botState != 'broken'"
+          v-if="isPlayMode && !isTalking && botState != 'broken'"
           expand="full"
-          @click="askQuestion"
+          @click.prevent="askQuestion"
           >Start new vocabulary</ion-button
         >
       </ion-footer>
@@ -213,7 +213,7 @@ export default {
     async showToast(text, color) {
       const toast = await toastController.create({
         message: text,
-        duration: 5000,
+        duration: 10000,
         color: color,
         translucent: false,
         cssClass:"toast-custom-position",
@@ -243,18 +243,26 @@ export default {
     async askQuestion() {
       this.audioConfig = AudioConfig.fromDefaultMicrophoneInput();
       this.isResolved = false;
-      var self = this;
       this.isComputing = true;
+      var self = this;
+      self.text = null;
+      self.speech_phrases= null;
+
+      const randomWord = self.vocabulary[(Math.random() * self.vocabulary.length) | 0];
+      self.word = randomWord;
 
       await this.enableMicrophone()
         .then(function () {
+
+          console.log('isMicrophoneEnabled', self.isMicrophoneEnabled);
+
           if (self.isMicrophoneEnabled) {
-            self.isComputing = false;
+            self.isComputing = false;            
             self.isQuery = true;
             self.isPlayMode = false;
             self.speech_phrases = "";
-            const randomWord = self.vocabulary[(Math.random() * self.vocabulary.length) | 0];
-            self.word = randomWord;
+            
+            
 
             let apiType = "wordMeaning";
             if (self.selectedOperator == "vocabulary")
@@ -312,6 +320,16 @@ export default {
           this.synth.speak(this.greetingSpeech);
         }
     },
+    stopSpeech(){
+        self.isListening = false;
+        self.isComputing = false;
+        
+        if (self.speechRecording)
+        {
+          self.speechRecording.close();
+          self.speechRecording = null;
+        }
+    },
     listen() {
       this.showToast("Listening...", "warning");
       this.isComputing = true;
@@ -353,6 +371,7 @@ export default {
       this.speechRecording.canceled  = function (s, e) {
         window.console.log('canceled ', e);
         self.validateSpeechRecording("cancelled speech", true);
+        self.stopSpeech();
       };
 
       this.speechRecording.sessionStarted  = function (s, e) {
@@ -360,6 +379,7 @@ export default {
       };
       this.speechRecording.sessionStopped  = function (s, e) {
         window.console.log('sessionStopped ', e);
+        self.stopSpeech();
       };
 
       this.speechRecording.recognizeOnceAsync(
@@ -369,7 +389,7 @@ export default {
           switch (result.reason) {
             case ResultReason.NoMatch:
             case ResultReason.Canceled:
-            await self.validateSpeechRecording("🤐 (Silence)", true);
+            await self.validateSpeechRecording(undefined, true);
               break;
             default:
             await self.validateSpeechRecording(result.text, true);
@@ -378,22 +398,16 @@ export default {
 
           console.log("recognizeOnceAsync", result);
          
-          self.isListening = false;
-          self.isComputing = false;
-          self.speechRecording.close();
-          self.speechRecording = null;
+          self.stopSpeech();
         },
         function (err) {
           console.log("err recognizeOnceAsync", err);
           self.showToast("Unable to connect to the server.", "danger");
-          self.isListening = false;
-          self.isComputing = false;
+          self.stopSpeech();
           self.isQuery = false;
           self.isError = true;
           self.text = "Unable to recognized the voice. Internal error";
           self.showToast(self.text);
-          self.speechRecording.close();
-          self.speechRecording = null;
         }
       );
     },
@@ -422,11 +436,25 @@ export default {
         }
       };
 
+
+      this.greetingSpeech.onerror = () => {
+        this.isTalking = false;
+        if (this.isQuery) {
+          this.isQuery = false;
+          this.listen();
+        }
+      };
+
       this.greetingSpeech.onboundary = (e) => {
         this.isOnBoundary = true;
+        // console.log('isOnBoundary', e);
         if (e.name == "word") {
           var word = this.getWordAt(this.text, e.charIndex).toLowerCase();
-          this.speech_phrases += word + " ";
+          // console.log('isOnBoundary word', word);
+          // console.log('this.speech_phrases word', this.speech_phrases);
+          if (word != this.speech_phrases){
+            this.speech_phrases += word + " ";
+          }
         }
       };
     },
@@ -440,7 +468,7 @@ export default {
 
       if (isSilent && this.typeText.length >= 0)
       {
-        this.showToast("Your response is (silent)", "secondary");
+        this.showToast("Your response is 🤐 (silent)", "warning");
 
         // keep it silent
       }
@@ -493,6 +521,8 @@ export default {
             }
             self.speak();
             self.isPlayMode = true;
+            self.isComputing = false;
+            self.isListening = false;
         } catch  (error) {
           console.error(error);
           self.isError = true;
@@ -519,7 +549,7 @@ export default {
       // The last word in the string is a special case.
       if (right < 0) {
         if (!this.isQuery) {
-          this.isPlayMode = true;
+          // this.isPlayMode = true;
         }
         this.isTalking = false;
         return str.slice(left);
