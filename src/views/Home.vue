@@ -334,6 +334,8 @@ export default {
       this.showToast("Listening...", "warning");
       this.isComputing = true;
       this.isListening = false;
+      this.audioConfig = AudioConfig.fromDefaultMicrophoneInput();
+      
       var sc = SpeechConfig.fromAuthorizationToken(
         // eslint-disable-next-line no-undef
         this.token,
