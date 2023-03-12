@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Vocabulary Game V1.0.2</ion-title>
+        <ion-title>Vocabulary Game V1.0.3</ion-title>
         <ion-chip slot="end">
           <ion-icon :icon="star" color="dark"></ion-icon>
           <ion-label>{{ stars }}</ion-label>
@@ -20,7 +20,7 @@
         <ion-select-option value="11+">11+</ion-select-option>
       </ion-select>
     </ion-item>
-    <ion-item v-show="false">
+    <ion-item>
       <ion-label>Operator</ion-label>
       <ion-select
         interface="popover"
@@ -178,15 +178,6 @@ export default {
         return "thinking";
       }
     },
-    expectedResultAsNumber() {
-      if (this.selectedOperator == "synonyms") {
-        return this.number1 + this.number2;
-      }
-      if (this.selectedOperator == "antonyms") {
-        return this.number1 - this.number2;
-      }
-      return this.number1 * this.number2;
-    },
   },
   methods: {
     changeStatus(status) {
@@ -260,15 +251,35 @@ export default {
             self.isQuery = true;
             self.isPlayMode = false;
             self.speech_phrases = "";
+            const randomWord = self.vocabulary[(Math.random() * self.vocabulary.length) | 0];
+            self.word = randomWord;
 
             if (self.selectedOperator == "vocabulary")
             {
-              // step 1 find a randon word
-              self.word = self.vocabulary[(Math.random() * self.vocabulary.length) | 0]
               self.text =
               "What '" +
               self.word +
               "' means?";
+              self.speak();
+              self.axiosClient.get("wordMeaning?word=" + self.word)    .then(response => {
+                    // Handle response
+                    console.log(response.data);
+                });
+            } 
+            else if (self.selectedOperator == "synonyms")
+            {
+              self.text =
+              "What is the synonyms of '" +
+              self.word +
+              "'?";
+              self.speak();
+            }
+            else if (self.selectedOperator == "antonyms")
+            {
+              self.text =
+              "What is the antonyms of '" +
+              self.word +
+              "'?";
               self.speak();
             }
           } else {
@@ -401,15 +412,21 @@ export default {
         this.showToast("Your response is : " + recordedText, "secondary");
         // this.validateWord(recordedText);
       }
-
-      //console.log('Correct anwser for:' + this.expectedResultAsNumber + ' => ' + recordedText + ' is ' + this.isResolved);
-
+      
       if (isFinalResult)
       {
         let self = this;
         try {
 
-          var res = await self.axiosClient.get("wordMeaning?word=" + self.word + "&meaning=" + recordedText)            
+          let apiType = "wordMeaning";
+
+          if (self.selectedOperator == "synonyms") {
+            apiType =  "wordSynonyms";
+          }
+          if (self.selectedOperator == "antonyms") {
+            apiType = "wordAntonyms";
+          }
+          var res = await self.axiosClient.get(apiType + "?word=" + self.word + "&meaning=" + recordedText)            
           
           let aiResponse = null;
 
@@ -434,8 +451,8 @@ export default {
               self.text =
               self.incorrect_phases[
                   Math.floor(Math.random() * self.incorrect_phases.length)
-                ] + "." +
-                aiResponse;
+                ] + 
+                (self.selectedOperator == "vocabulary" ? aiResponse : (", the answer: '" + recordedText + "', is incorrect."));
             }
             self.speak();
             self.isPlayMode = true;
