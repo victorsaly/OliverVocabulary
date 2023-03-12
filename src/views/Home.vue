@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Vocabulary Game V1.0.1</ion-title>
+        <ion-title>Vocabulary Game V1.0.2</ion-title>
         <ion-chip slot="end">
           <ion-icon :icon="star" color="dark"></ion-icon>
           <ion-label>{{ stars }}</ion-label>
@@ -425,7 +425,7 @@ export default {
                 self.text = 
                   self.encourage_phases[
                     Math.floor(Math.random() * self.encourage_phases.length)
-                  ] + aiResponse + "." +
+                  ] + "." + aiResponse + "." +
                   "; You earned " +
                   self.stars +
                   " star" +
