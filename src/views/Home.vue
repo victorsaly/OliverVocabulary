@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Vocabulary Game V1.0.3</ion-title>
+        <ion-title>Vocabulary Game V1.0.4</ion-title>
         <ion-chip slot="end">
           <ion-icon :icon="star" color="dark"></ion-icon>
           <ion-label>{{ stars }}</ion-label>
@@ -254,6 +254,7 @@ export default {
             const randomWord = self.vocabulary[(Math.random() * self.vocabulary.length) | 0];
             self.word = randomWord;
 
+            let apiType = "wordMeaning";
             if (self.selectedOperator == "vocabulary")
             {
               self.text =
@@ -261,13 +262,11 @@ export default {
               self.word +
               "' means?";
               self.speak();
-              self.axiosClient.get("wordMeaning?word=" + self.word)    .then(response => {
-                    // Handle response
-                    console.log(response.data);
-                });
+              
             } 
             else if (self.selectedOperator == "synonyms")
             {
+              apiType =  "wordSynonyms";
               self.text =
               "What is the synonyms of '" +
               self.word +
@@ -276,12 +275,19 @@ export default {
             }
             else if (self.selectedOperator == "antonyms")
             {
+              apiType = "wordAntonyms";
               self.text =
               "What is the antonyms of '" +
               self.word +
               "'?";
               self.speak();
             }
+
+            self.axiosClient.get(apiType + "?word=" + self.word)    .then(response => {
+                    // Handle response
+                    console.log(response.data);
+                });
+
           } else {
             self.speech_phrases = "microphone not available";
             self.isError = true;
@@ -426,7 +432,7 @@ export default {
           if (self.selectedOperator == "antonyms") {
             apiType = "wordAntonyms";
           }
-          var res = await self.axiosClient.get(apiType + "?word=" + self.word + "&meaning=" + recordedText)            
+          var res = await self.axiosClient.get(apiType + "?word=" + self.word + "&answer=" + recordedText)            
           
           let aiResponse = null;
 
@@ -435,6 +441,7 @@ export default {
             aiResponse = res.data;
           }
           console.log(aiResponse);
+
           if (aiResponse != null && aiResponse.includes('Yes'))
             {
               self.stars++;
@@ -443,7 +450,7 @@ export default {
                   self.encourage_phases[
                     Math.floor(Math.random() * self.encourage_phases.length)
                   ] + "." + aiResponse + "." +
-                  "; You earned " +
+                  "You earned " +
                   self.stars +
                   " star" +
                   (self.stars == 1 ? "" : "s");
@@ -451,8 +458,7 @@ export default {
               self.text =
               self.incorrect_phases[
                   Math.floor(Math.random() * self.incorrect_phases.length)
-                ] + 
-                (self.selectedOperator == "vocabulary" ? aiResponse : (", the answer: '" + recordedText + "', is incorrect."));
+                ] +  aiResponse;
             }
             self.speak();
             self.isPlayMode = true;
