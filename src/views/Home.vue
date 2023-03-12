@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Vocabulary Game V1.0.4</ion-title>
+        <ion-title>Vocabulary Game V1.0.5</ion-title>
         <ion-chip slot="end">
           <ion-icon :icon="star" color="dark"></ion-icon>
           <ion-label>{{ stars }}</ion-label>
@@ -79,6 +79,8 @@ import {
   AudioConfig,
   SpeechConfig,
   SpeechRecognizer,
+  ResultReason,
+  PropertyId,
 } from "microsoft-cognitiveservices-speech-sdk";
 import axios from "axios";
 import { star } from "ionicons/icons";
@@ -320,6 +322,7 @@ export default {
         "uksouth"
       );
       sc.speechRecognitionLanguage = "en-GB";
+      sc.setProperty(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, "4000");
       this.speechConfig = sc;
       this.speechRecording = new SpeechRecognizer(
         this.speechConfig,
@@ -342,13 +345,39 @@ export default {
       };
 
       this.speechRecording.recognizing  = function (s, e) {
-        window.console.log('recognizing ', e.result.text);
-        // self.validateSpeechRecording(e.result.text, false);
+        window.console.log('recognizing ', e);
+        self.validateSpeechRecording(e.result.text, false);
+      };
+
+
+      this.speechRecording.canceled  = function (s, e) {
+        window.console.log('canceled ', e);
+        self.validateSpeechRecording("cancelled speech", true);
+      };
+
+      this.speechRecording.sessionStarted  = function (s, e) {
+        window.console.log('sessionStarted ', e);
+      };
+      this.speechRecording.sessionStopped  = function (s, e) {
+        window.console.log('sessionStopped ', e);
       };
 
       this.speechRecording.recognizeOnceAsync(
         async function (result) {
-          await self.validateSpeechRecording(result.text, true);
+          console.log("(recognized)  Reason:" + ResultReason[result.reason]);
+
+          switch (result.reason) {
+            case ResultReason.NoMatch:
+            case ResultReason.Canceled:
+            await self.validateSpeechRecording("🤐 (Silence)", true);
+              break;
+            default:
+            await self.validateSpeechRecording(result.text, true);
+              break;
+          }
+
+          console.log("recognizeOnceAsync", result);
+         
           self.isListening = false;
           self.isComputing = false;
           self.speechRecording.close();
@@ -411,6 +440,8 @@ export default {
 
       if (isSilent && this.typeText.length >= 0)
       {
+        this.showToast("Your response is (silent)", "secondary");
+
         // keep it silent
       }
       else
