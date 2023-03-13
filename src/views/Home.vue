@@ -341,7 +341,7 @@ export default {
           this.speechRecording = null;
         }
     },
-    listen() {
+    async listen() {
       
       this.showToast("Listening...", "warning");
       this.isComputing = true;
@@ -360,7 +360,7 @@ export default {
         this.speechConfig,
         this.audioConfig
       );
-      this.listenForSpeechRecordingEvents();
+      await this.listenForSpeechRecordingEvents();
     },
     /**
      * React to speech recording events
