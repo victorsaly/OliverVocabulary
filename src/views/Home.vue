@@ -392,7 +392,7 @@ export default {
       };
       this.speechRecording.sessionStopped  = function (s, e) {
         window.console.log('sessionStopped ', e);
-        self.stopSpeech();
+        // self.stopSpeech();
       };
 
       this.speechRecording.recognizeOnceAsync(
