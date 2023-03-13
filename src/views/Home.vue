@@ -255,11 +255,11 @@ export default {
 
       await this.enableMicrophone()
         .then(function () {
-
-          console.log('isMicrophoneEnabled', self.isMicrophoneEnabled);
+          const isEnabled = self.isMicrophoneEnabled === true;
+          console.log('isMicrophoneEnabled', isEnabled);
           console.log('selectedOperator', self.selectedOperator);
 
-          if (self.isMicrophoneEnabled) {
+          if (isEnabled) {
             self.isComputing = false;            
             self.isQuery = true;
             self.isPlayMode = false;
@@ -315,6 +315,7 @@ export default {
      * Shout at the user
      */
     speak() {
+        console.log('speak', this.text);
         if (!this.synth.speaking){
           this.greetingSpeech.text = this.text;
           this.synth.speak(this.greetingSpeech);
@@ -330,13 +331,14 @@ export default {
         }
     },
     stopSpeech(){
-        self.isListening = false;
-        self.isComputing = false;
+        console.log('stop speech');
+        this.isListening = false;
+        this.isComputing = false;
         
-        if (self.speechRecording)
+        if (this.speechRecording)
         {
-          self.speechRecording.close();
-          self.speechRecording = null;
+          this.speechRecording.close();
+          this.speechRecording = null;
         }
     },
     listen() {
