@@ -318,6 +318,14 @@ export default {
         if (!this.synth.speaking){
           this.greetingSpeech.text = this.text;
           this.synth.speak(this.greetingSpeech);
+        } else {
+          console.error('Already speaking...');
+          this.synth.cancel();
+          if (this.timeout) 
+          clearTimeout(this.timeout); 
+          this.timeout = setTimeout(() => {
+            this.synth.speak(this.greetingSpeech);
+          }, 600); // delay
         }
     },
     stopSpeech(){
