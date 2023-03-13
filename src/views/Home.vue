@@ -238,6 +238,8 @@ export default {
             self.showToast("Microphone disabled", "danger");
             self.isMicrophoneEnabled = false;
           });
+      }else{
+        return;
       }
     },
     async askQuestion() {
@@ -255,6 +257,7 @@ export default {
         .then(function () {
 
           console.log('isMicrophoneEnabled', self.isMicrophoneEnabled);
+          console.log('selectedOperator', self.selectedOperator);
 
           if (self.isMicrophoneEnabled) {
             self.isComputing = false;            
@@ -265,16 +268,7 @@ export default {
             
 
             let apiType = "wordMeaning";
-            if (self.selectedOperator == "vocabulary")
-            {
-              self.text =
-              "What '" +
-              self.word +
-              "' means?";
-              self.speak();
-              
-            } 
-            else if (self.selectedOperator == "synonyms")
+            if (self.selectedOperator == "synonyms")
             {
               apiType =  "wordSynonyms";
               self.text =
@@ -290,6 +284,12 @@ export default {
               "What is the antonyms of '" +
               self.word +
               "'?";
+              self.speak();
+            }else{
+              self.text =
+              "What '" +
+              self.word +
+              "' means?";
               self.speak();
             }
 
@@ -324,6 +324,7 @@ export default {
           if (this.timeout) 
           clearTimeout(this.timeout); 
           this.timeout = setTimeout(() => {
+            this.greetingSpeech.text = this.text;
             this.synth.speak(this.greetingSpeech);
           }, 600); // delay
         }
