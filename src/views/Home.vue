@@ -342,6 +342,7 @@ export default {
         }
     },
     listen() {
+      
       this.showToast("Listening...", "warning");
       this.isComputing = true;
       this.isListening = false;
@@ -392,7 +393,7 @@ export default {
       };
       this.speechRecording.sessionStopped  = function (s, e) {
         window.console.log('sessionStopped ', e);
-        // self.stopSpeech();
+        //self.stopSpeech();
       };
 
       this.speechRecording.recognizeOnceAsync(
