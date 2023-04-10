@@ -1,6 +1,6 @@
 {
-  "name": "OliverVocabulary",
-  "version": "1.0.7",
+  "name": "oliver-vocabulary",
+  "version": "1.0.8",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -17,7 +17,7 @@
     "@sentry/vue": "^7.42.0",
     "axios": "^0.21.1",
     "core-js": "^3.6.5",
-    "microsoft-cognitiveservices-speech-sdk": "^1.17.0",
+    "microsoft-cognitiveservices-speech-sdk": "^1.27.0",
     "vue": "^3.0.0-0",
     "vue-router": "^4.0.0-0"
   },

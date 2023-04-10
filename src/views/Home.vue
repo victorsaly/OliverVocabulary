@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Vocabulary Game V1.0.7</ion-title>
+        <ion-title>Vocabulary Game V1.0.8</ion-title>
         <ion-chip slot="end">
           <ion-icon :icon="star" color="dark"></ion-icon>
           <ion-label>{{ stars }}</ion-label>
@@ -356,6 +356,10 @@ export default {
       sc.speechRecognitionLanguage = "en-GB";
       sc.setProperty(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, "4000");
       this.speechConfig = sc;
+      if (this.speechRecognizer)
+      {
+        this.speechRecognizer.destroy();
+      }      
       this.speechRecording = new SpeechRecognizer(
         this.speechConfig,
         this.audioConfig
