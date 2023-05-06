@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Vocabulary Game V1.0.8</ion-title>
+        <ion-title>Vocabulary Game V1.0.9</ion-title>
         <ion-chip slot="end">
           <ion-icon :icon="star" color="dark"></ion-icon>
           <ion-label>{{ stars }}</ion-label>
@@ -248,7 +248,7 @@ export default {
       }
     },
     reloadApp() {
-       this.$forceUpdate();
+       window.location.reload();
     },
     async askQuestion() {
       this.audioConfig = AudioConfig.fromDefaultMicrophoneInput();
