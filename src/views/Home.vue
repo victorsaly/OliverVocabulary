@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Vocabulary Game V1.0.8</ion-title>
+        <ion-title>Vocabulary Game V1.0.9</ion-title>
         <ion-chip slot="end">
           <ion-icon :icon="star" color="dark"></ion-icon>
           <ion-label>{{ stars }}</ion-label>
@@ -48,11 +48,15 @@
     
       <ion-footer no-padding style="margin-bottom:5px;">
           <ion-button
-          v-if="isPlayMode && !isTalking && botState != 'broken'"
+          v-if="!isSecondPlay && isPlayMode && !isTalking && botState != 'broken'"
           expand="full"
           @click.prevent="askQuestion"
-          >Start new vocabulary</ion-button
-        >
+          >Start new vocabulary</ion-button>
+          <ion-button
+          v-if="isSecondPlay && isPlayMode && !isTalking && botState != 'broken'"
+          expand="full"
+          @click.prevent="reloadApp"
+          >Reload App</ion-button>
       </ion-footer>
   </ion-page>
 </template>
@@ -116,6 +120,7 @@ export default {
       isQuery: false,
       isPlayMode: true,
       isResolved: false,
+      isSecondPlay:false,
       text: "",
       selectedLevel: "11+",
       selectedOperator: "vocabulary",
@@ -241,6 +246,9 @@ export default {
       }else{
         return;
       }
+    },
+    reloadApp() {
+       window.location.reload();
     },
     async askQuestion() {
       this.audioConfig = AudioConfig.fromDefaultMicrophoneInput();
@@ -415,7 +423,7 @@ export default {
           }
 
           console.log("recognizeOnceAsync", result);
-         
+          self.isSecondPlay = true;
           self.stopSpeech();
         },
         function (err) {
